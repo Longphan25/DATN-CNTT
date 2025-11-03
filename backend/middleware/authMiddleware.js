@@ -1,22 +1,15 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
 
-// Middleware kiểm tra token
-const authMiddleware = (req, res, next) => {
+module.exports = (req, res, next) => {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ message: 'No token' });
+  const token = auth.split(' ')[1];
   try {
-    // Lấy token từ header
-    const token = req.header("Authorization")?.replace("Bearer ", "");
-
-    if (!token) {
-      return res.status(401).json({ message: "Không có token, truy cập bị từ chối!" });
-    }
-
-    // Xác thực token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secretkey");
-    req.user = decoded; // Gán thông tin user vào request
-    next(); // Cho phép đi tiếp
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
+    next();
   } catch (err) {
-    res.status(401).json({ message: "Token không hợp lệ hoặc đã hết hạn!" });
+    return res.status(401).json({ message: 'Invalid token' });
   }
 };
-
-module.exports = authMiddleware;

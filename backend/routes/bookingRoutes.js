@@ -1,33 +1,19 @@
+// routes/bookingRoutes.js
 const express = require('express');
 const router = express.Router();
-const Booking = require('../models/Booking');
-const TripSeatStatus = require('../models/TripSeatStatus');
 
-router.post('/', async (req, res) => {
-  try {
-    const { user, trip, seat_numbers, total_price } = req.body;
-    for (const s of seat_numbers) {
-      const updated = await TripSeatStatus.findOneAndUpdate(
-        { trip, seat_number: s, status: 'available' },
-        { $set: { status: 'reserved' } },
-        { new: true }
-      );
-      if (!updated) return res.status(400).json({ error: `Seat ${s} not available` });
-    }
-    const booking = await Booking.create({ ...req.body, status: 'paid' });
-    await TripSeatStatus.updateMany(
-      { trip, seat_number: { $in: seat_numbers } },
-      { $set: { status: 'booked', booking_id: booking._id } }
-    );
-    res.status(201).json(booking);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+const bookingController = require('../controllers/bookingController');
 
-router.get('/', async (req, res) => {
-  const bookings = await Booking.find().populate('user').populate('trip');
-  res.json(bookings);
-});
+// === Booking APIs ===
+
+// FE bấm “Thanh toán” gọi endpoint này -> lưu Booking, Payment, cập nhật ghế
+router.post('/checkout', bookingController.checkout);
+
+// Lấy danh sách booking (tuỳ ý dùng cho “Vé của tôi” hoặc admin)
+// - có thể truyền ?userId=... hoặc ?phone=... để lọc
+router.get('/', bookingController.listOfUser);
+
+// Lấy chi tiết 1 booking theo id
+router.get('/:id', bookingController.detail);
 
 module.exports = router;

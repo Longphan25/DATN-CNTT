@@ -5,6 +5,6 @@ const tripSeatStatusSchema = new mongoose.Schema({
   seat_number: String,
   status: { type: String, enum: ['available','reserved','booked','checked_in'], default: 'available' },
   booking_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', default: null }
-}, { timestamps: true });
+}, { timestamps: true, collection: 'trip_seat_status' });
 
 module.exports = mongoose.model('TripSeatStatus', tripSeatStatusSchema);

@@ -29,4 +29,23 @@ router.post('/', async (req, res) => {
   }
 });
 
+// GET /api/trips/:id  → lấy chi tiết chuyến + trạng thái ghế
+router.get('/:id', async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id)
+      .populate('route')
+      .populate('bus');
+
+    if (!trip) return res.status(404).json({ error: 'Trip not found' });
+
+    // Lấy danh sách ghế
+    const seats = await TripSeatStatus.find({ trip: trip._id }).sort({ seat_number: 1 });
+
+    res.json({ trip, seats });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;

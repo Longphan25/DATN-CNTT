@@ -7,4 +7,4 @@ const routeStopSchema = new mongoose.Schema({
   type: { type: String, enum: ['pickup','dropoff','both'], default: 'both' }
 });
 
-module.exports = mongoose.model('RouteStop', routeStopSchema);
+module.exports = mongoose.model('RouteStop', routeStopSchema, 'route_stops');

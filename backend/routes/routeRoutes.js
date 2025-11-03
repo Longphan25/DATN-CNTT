@@ -1,34 +1,18 @@
+// routes/routeRoutes.js
 const express = require('express');
 const router = express.Router();
-const Route = require('../models/Route');
-const RouteStop = require('../models/RouteStop');
+const routeController = require('../controllers/routeController');
 
-router.post('/', async (req, res) => {
-  try {
-    const r = await Route.create(req.body);
-    res.status(201).json(r);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+// POST /api/routes  → tạo tuyến
+router.post('/', routeController.createRoute);
 
-router.get('/', async (req, res) => {
-  const routes = await Route.find();
-  res.json(routes);
-});
+// GET  /api/routes  → lấy tất cả tuyến (dùng cho "popular routes")
+router.get('/', routeController.getAllRoutes);
 
-router.post('/:routeId/stops', async (req, res) => {
-  try {
-    const stop = await RouteStop.create({ ...req.body, route: req.params.routeId });
-    res.status(201).json(stop);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
+// POST /api/routes/:routeId/stops → tạo điểm dừng cho tuyến
+router.post('/:routeId/stops', routeController.createStop);
 
-router.get('/:routeId/stops', async (req, res) => {
-  const stops = await RouteStop.find({ route: req.params.routeId }).sort({ order: 1 });
-  res.json(stops);
-});
+// GET  /api/routes/:routeId/stops → lấy điểm dừng theo tuyến (sort by order ASC)
+router.get('/:routeId/stops', routeController.getStops);
 
 module.exports = router;
